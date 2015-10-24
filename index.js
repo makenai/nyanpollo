@@ -10,7 +10,7 @@ var board = new five.Board({
 });
 
 var started = new Date();
-var filename = '/mnt/usb/nyanpollo-' + started.toISOString().replace(/:/g, '_');
+var filename = '/mnt/usb/data/nyanpollo-' + started.toISOString().replace(/:/g, '_');
 
 // Data Logger
 var logger = new winston.Logger({

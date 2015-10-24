@@ -1,2 +1,2 @@
 #!/bin/bash
-rm -f /mnt/usb/*
+rm -f /mnt/usb/data/*
