@@ -5,6 +5,7 @@ var winston = require('winston');
 var raspi = require('raspi-io');
 var five = require('johnny-five');
 var RaspiCam = require("raspicam");
+var SerialPort = require("serialport");
 var board = new five.Board({
   io: new raspi()
 });
@@ -33,6 +34,15 @@ var ui = new UI('Nyanpollo');
 ui.onQuit( function() {
   camera.stop();
   process.exit(0);
+});
+
+var trackuino = new SerialPort.SerialPort("/dev/ttyUSB0", {
+  baudrate: 9600,
+  dataBits: 8,
+  parity: 'none',
+  stopBits: 1,
+  flowControl: true,
+  parser: SerialPort.parsers.readline("\n")
 });
 
 board.on("ready", function() {
@@ -92,6 +102,25 @@ board.on("ready", function() {
     };
     ui.update( currentData );
     ui.log('read imu data');
+  });
+
+  trackuino.on('open', function(){
+    trackuino.on('data', function(data) {
+      var time = data.match(/(\d{6})h/);
+      var lat  = data.match(/([0-9.]+(N|S))/);
+      var long  = data.match(/([0-9.]+(E|W))/);
+      var alt  = data.match(/A=(\d+)/);
+      if ( time ) {
+        currentData.gps = {
+          time: time[1],
+          latitude: lat[1],
+          longitude: long[1],
+          altitude: alt[1]
+        };
+        ui.update( currentData );
+        ui.log('read gps data');
+      }
+    });
   });
 
   setInterval(function() {
